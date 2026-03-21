@@ -1,36 +1,47 @@
 #!/bin/bash
 
-PATH_MIGRACION="./database/migrations"
-DATE=$(date +%Y%m%d)
+# Configuración de rutas
+CARPETA_MIGRACIONES="./database/migrations"
+FECHA=$(date +%Y_%m_%d_%H%M%S)
 
-# 1. Obtener el nombre de la migración del primer argumento
+# 1. Validar si se pasó el nombre de la migración
 if [ -z "$1" ]; then
-    echo "Uso: ./scripts/create_migration.sh <nombre_de_la_migracion>"
+    echo "⚠️  Error: Debes proporcionar un nombre para la migración."
+    echo "Uso: ./scripts/create_migration.sh nombre_de_la_tabla"
     exit 1
 fi
 
-NOMBRE_MIGRACION=$1
+# Limpiar el nombre (reemplazar espacios por guiones bajos si los hay)
+NOMBRE_LIMPIO=$(echo "$1" | tr ' ' '_')
 
-# 2. Encontrar el último número de secuencia
-# Buscamos archivos que empiecen con 3 dígitos, los ordenamos y tomamos el último
-ULTIMO_NUM=$(ls $PATH_MIGRACION | grep -E '^[0-9]{3}_' | sort -r | head -n 1 | cut -d'_' -f1)
+# 2. Asegurar que la carpeta exista
+mkdir -p "$CARPETA_MIGRACIONES"
 
-# 3. Calcular el siguiente número (si no hay archivos, empezar en 001)
-if [ -z "$ULTIMO_NUM" ]; then
-    SIGUIENTE_NUM=1
+# 3. Obtener el último número de secuencia (ej: 003)
+# Buscamos archivos que inicien con 3 dígitos seguidos de un guion bajo
+ULTIMO_ARCHIVO=$(ls "$CARPETA_MIGRACIONES" | grep -E '^[0-9]{3}_' | sort | tail -n 1)
+
+if [ -z "$ULTIMO_ARCHIVO" ]; then
+    SIGUIENTE_NRO=1
 else
-    # Eliminamos ceros a la izquierda para la suma y luego los reponemos
-    SIGUIENTE_NUM=$((10#$ULTIMO_NUM + 1))
+    # Extraer los primeros 3 caracteres y convertirlos a base 10 para sumar
+    ULTIMO_NRO=$(echo "$ULTIMO_ARCHIVO" | cut -c1-3)
+    SIGUIENTE_NRO=$((10#$ULTIMO_NRO + 1))
 fi
 
-# 4. Formatear el número a 3 dígitos (ej: 005)
-NUMERO_FORMATEADO=$(printf "%03d" $SIGUIENTE_NUM)
+# 4. Formatear el número a 3 dígitos (ej: 004)
+NRO_FORMATEADO=$(printf "%03d" $SIGUIENTE_NRO)
 
-# 5. Crear el nombre del archivo
-# Formato: {nro}_fecha_{nombre}
-FILENAME="${NUMERO_FORMATEADO}_${DATE}_${NOMBRE_MIGRACION}.sql"
+# 5. Construir el nombre final al estilo Laravel
+# Formato: {NRO}_{FECHA}_crear_{NOMBRE}.sql
+NOMBRE_ARCHIVO="${NRO_FORMATEADO}_${FECHA}_crear_${NOMBRE_LIMPIO}.sql"
 
-# 6. Crear el archivo vacío
-touch "$PATH_MIGRACION/$FILENAME"
+# 6. Crear el archivo con un comentario inicial
+cat <<EOF > "$CARPETA_MIGRACIONES/$NOMBRE_ARCHIVO"
+-- Migración: $NOMBRE_LIMPIO
+-- Creada el: $(date '+%d/%m/%Y %H:%M:%S')
+-- Secuencia: $NRO_FORMATEADO
 
-echo "Migración creada: $PATH_MIGRACION/$FILENAME"
+EOF
+
+echo "Migración creada con éxito: $CARPETA_MIGRACIONES/$NOMBRE_ARCHIVO"
