@@ -42,6 +42,10 @@ cat <<EOF > "$CARPETA_MIGRACIONES/$NOMBRE_ARCHIVO"
 -- Creada el: $(date '+%d/%m/%Y %H:%M:%S')
 -- Secuencia: $NRO_FORMATEADO
 
+CREATE TABLE $NOMBRE_LIMPIO (
+    -- Agrega las columnas de la tabla
+)
+
 EOF
 
 echo "Migración creada con éxito: $CARPETA_MIGRACIONES/$NOMBRE_ARCHIVO"
