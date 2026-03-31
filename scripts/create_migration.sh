@@ -6,7 +6,7 @@ FECHA=$(date +%Y_%m_%d_%H%M%S)
 
 # 1. Validar si se pasó el nombre de la migración
 if [ -z "$1" ]; then
-    echo "⚠️  Error: Debes proporcionar un nombre para la migración."
+    echo "Error: Debes proporcionar un nombre para la migración."
     echo "Uso: ./scripts/create_migration.sh nombre_de_la_tabla"
     exit 1
 fi
@@ -43,8 +43,11 @@ cat <<EOF > "$CARPETA_MIGRACIONES/$NOMBRE_ARCHIVO"
 -- Secuencia: $NRO_FORMATEADO
 
 CREATE TABLE $NOMBRE_LIMPIO (
+    -- id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     -- Agrega las columnas de la tabla
-)
+    -- fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- fecha_modificacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 EOF
 
