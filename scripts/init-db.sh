@@ -33,11 +33,9 @@ echo -e "\n${VERDE}¡PostgreSQL está Healthy!${NC}"
 
 # 4. Listar las tablas creadas para confirmar visualmente
 echo -e "${CIAN}Esquema actual:${NC}"
-docker exec -it postgres-increibleia psql -U postgres -d ${DB_NAME} -c "\dt"
+docker exec -it postgres-increibleia psql -U ${DB_USER} -d ${DB_NAME} -c "\dt"
 
 echo -e "\n${VERDE}¡Entorno listo para desarrollo!${NC}"
 
 # 4. Opcional: Ejecutar el seed si existe
 # docker exec -i postgres-increibleia psql -U postgres -d ${DB_NAME} < database/seed/seed.sql
-
-# NOTA: Por mientras se están borrando los volúmenes en la fase de desarrollo.
