@@ -20,7 +20,5 @@ INSERT INTO tipos_documento_identidad (tipo_documento_identidad) VALUES
 CREATE TRIGGER tr_actualizar_fecha_modificacion_tipos_documento_identidad
 BEFORE UPDATE ON tipos_documento_identidad
 FOR EACH ROW
-WHEN (OLD.tipo_documento_identidad IS DISTINCT FROM 
-    NEW.tipo_documento_identidad OR
-    OLD.activo IS DISTINCT FROM NEW.activo)
+WHEN (OLD IS DISTINCT FROM NEW)
 EXECUTE FUNCTION fn_actualizar_fecha_modificacion();

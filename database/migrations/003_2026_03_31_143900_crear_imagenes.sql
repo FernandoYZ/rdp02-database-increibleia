@@ -5,16 +5,17 @@
 CREATE TABLE imagenes (
     id_imagen INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre_imagen VARCHAR(255) NOT NULL,
+    url TEXT NOT NULL,
+    mime_type VARCHAR(50),
+    size_bytes INT,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_modificacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TRIGGER tr_actualizar_fecha_modificacion_imagenes
 BEFORE UPDATE ON imagenes
 FOR EACH ROW
-WHEN (OLD.nombre_imagen IS DISTINCT FROM 
-    NEW.nombre_imagen OR
-    OLD.activo IS DISTINCT FROM NEW.activo)
+WHEN (OLD IS DISTINCT FROM NEW)
 EXECUTE FUNCTION fn_actualizar_fecha_modificacion();
 

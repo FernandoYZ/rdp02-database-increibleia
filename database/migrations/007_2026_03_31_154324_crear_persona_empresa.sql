@@ -4,23 +4,30 @@
 
 CREATE TABLE persona_empresa (
     id_persona_empresa INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_persona INTEGER REFERENCES personas(id_persona) ON DELETE CASCADE,
-    id_empresa INTEGER REFERENCES empresas(id_empresa) ON DELETE CASCADE,
+    id_persona BIGINT NOT NULL REFERENCES personas(id_persona) ON DELETE CASCADE,
+    id_empresa INT NOT NULL REFERENCES empresas(id_empresa) ON DELETE CASCADE,
     fecha_inicio DATE NOT NULL,
     fecha_fin DATE,
-    -- activo BOOLEAN NOT NULL DEFAULT TRUE, -- esta columna ya está en personas
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_modificacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT persona_empresa_fecha_fin CHECK (fecha_fin >= fecha_inicio)
+
+    CONSTRAINT chk_fechas_validas 
+        CHECK (fecha_fin IS NULL OR fecha_fin >= fecha_inicio),
+
+    CONSTRAINT uq_persona_empresa 
+        UNIQUE (id_persona, id_empresa, fecha_inicio),
+
+    CONSTRAINT no_solapamiento
+        EXCLUDE USING gist (
+            id_persona WITH =,
+            id_empresa WITH =,
+            daterange(fecha_inicio, COALESCE(fecha_fin, 'infinity'), '[]') WITH &&
+        )
 );
 
 CREATE TRIGGER tr_actualizar_fecha_modificacion_persona_empresa
 BEFORE UPDATE ON persona_empresa
 FOR EACH ROW
-WHEN (
-    OLD.id_persona IS DISTINCT FROM NEW.id_persona OR
-    OLD.id_empresa IS DISTINCT FROM NEW.id_empresa OR
-    OLD.fecha_inicio IS DISTINCT FROM NEW.fecha_inicio OR
-    OLD.fecha_fin IS DISTINCT FROM NEW.fecha_fin
-) EXECUTE FUNCTION fn_actualizar_fecha_modificacion();
-
+WHEN (OLD IS DISTINCT FROM NEW)
+EXECUTE FUNCTION fn_actualizar_fecha_modificacion();
